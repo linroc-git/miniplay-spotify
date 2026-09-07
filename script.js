@@ -51,6 +51,9 @@ const state = {
     devices: [],
     selectedDeviceId: null,
     config: null, // parsed config.json
+    // Playback (Phase 2)
+    activeTrackIndex: null,     // which track-button is currently playing
+    autoStopTimeoutId: null,    // setTimeout handle for auto-pause
 };
 
 // ============================================================================
@@ -303,6 +306,47 @@ async function fetchDevices() {
     return data.devices || [];
 }
 
+/**
+ * Start playback of a single track on the selected device.
+ * Uses PUT /me/player/play?device_id=... with uris + position_ms.
+ */
+async function playTrack(trackUri, positionMs, deviceId) {
+    const path = `/me/player/play?device_id=${encodeURIComponent(deviceId)}`;
+    const res = await spotifyFetch(path, {
+        method: 'PUT',
+        body: JSON.stringify({
+            uris: [trackUri],
+            position_ms: positionMs || 0,
+        }),
+    });
+    // 204 = success (no body). 202 = accepted (device waking up).
+    if (res.status === 204 || res.status === 202) return;
+    if (res.status === 404) {
+        throw new Error('Enhed ikke aktiv. Åbn Spotify-appen på enheden og prøv igen.');
+    }
+    if (res.status === 403) {
+        throw new Error('Playback afvist — kræver Spotify Premium.');
+    }
+    const text = await res.text().catch(() => '');
+    throw new Error(`Play fejlede (${res.status}): ${text}`);
+}
+
+/** Pause playback on the selected device. */
+async function pausePlayback(deviceId) {
+    const path = deviceId
+        ? `/me/player/pause?device_id=${encodeURIComponent(deviceId)}`
+        : '/me/player/pause';
+    const res = await spotifyFetch(path, { method: 'PUT' });
+    // 204 success. 403 often means "already paused" — treat as OK.
+    if (res.status === 204 || res.status === 202 || res.status === 403) return;
+    if (res.status === 404) {
+        // Device disappeared — silent OK, nothing to pause.
+        return;
+    }
+    const text = await res.text().catch(() => '');
+    throw new Error(`Pause fejlede (${res.status}): ${text}`);
+}
+
 // ============================================================================
 // Config
 // ============================================================================
@@ -425,13 +469,92 @@ function renderTrackButtons(tracks) {
         btn.className = 'track-btn';
         btn.textContent = track.label;
         btn.dataset.index = String(i);
-        btn.addEventListener('click', () => {
-            // TODO Phase 2: start playback with track.track_uri at start_ms,
-            // auto-stop after duration_ms, highlight this button.
-            setStatus(`(Phase 2) Ville afspille: ${track.label}`);
-        });
+        btn.addEventListener('click', () => handleTrackClick(i));
         els.trackButtons.appendChild(btn);
     });
+}
+
+/** Update .active class on track buttons based on state.activeTrackIndex. */
+function updateActiveButton() {
+    const buttons = els.trackButtons.querySelectorAll('.track-btn');
+    buttons.forEach((btn, i) => {
+        btn.classList.toggle('active', i === state.activeTrackIndex);
+    });
+}
+
+/** Cancel any pending auto-stop timer. */
+function clearAutoStop() {
+    if (state.autoStopTimeoutId !== null) {
+        clearTimeout(state.autoStopTimeoutId);
+        state.autoStopTimeoutId = null;
+    }
+}
+
+/** User clicked a track button — start playback + schedule auto-stop. */
+async function handleTrackClick(index) {
+    clearError();
+    const track = state.config[index];
+    if (!track) return;
+
+    if (!state.selectedDeviceId) {
+        showError('Vælg en enhed først.');
+        return;
+    }
+
+    // Cancel any in-flight playback + timer before starting a new one.
+    clearAutoStop();
+
+    const deviceId = state.selectedDeviceId;
+    setStatus(`Starter: ${track.label}...`);
+    state.activeTrackIndex = index;
+    updateActiveButton();
+
+    try {
+        await playTrack(track.track_uri, track.start_ms || 0, deviceId);
+        setStatus(`Afspiller: ${track.label} (stopper om ${Math.round(track.duration_ms / 1000)}s)`);
+
+        // Schedule auto-stop.
+        state.autoStopTimeoutId = setTimeout(async () => {
+            state.autoStopTimeoutId = null;
+            try {
+                await pausePlayback(deviceId);
+                if (state.activeTrackIndex === index) {
+                    state.activeTrackIndex = null;
+                    updateActiveButton();
+                    setStatus(`Færdig: ${track.label}`);
+                }
+            } catch (err) {
+                showError(`Auto-stop fejlede: ${err.message}`);
+            }
+        }, track.duration_ms);
+    } catch (err) {
+        state.activeTrackIndex = null;
+        updateActiveButton();
+        showError(err.message);
+        setStatus('Klar');
+    }
+}
+
+/** Manual stop button — cancel timer + pause immediately. */
+async function handleStopClick() {
+    clearError();
+    clearAutoStop();
+    const deviceId = state.selectedDeviceId;
+    const wasActive = state.activeTrackIndex !== null;
+    state.activeTrackIndex = null;
+    updateActiveButton();
+
+    if (!wasActive) {
+        setStatus('Ingenting spiller');
+        return;
+    }
+
+    try {
+        await pausePlayback(deviceId);
+        setStatus('Stoppet');
+    } catch (err) {
+        showError(err.message);
+    }
 }
 
 // ============================================================================
@@ -457,10 +580,7 @@ async function init() {
         state.selectedDeviceId = e.target.value;
         sessionStorage.setItem(SS_SELECTED_DEVICE, state.selectedDeviceId);
     });
-    els.stopBtn.addEventListener('click', () => {
-        // TODO Phase 2: PUT /me/player/pause
-        setStatus('(Phase 2) Ville stoppe afspilning');
-    });
+    els.stopBtn.addEventListener('click', handleStopClick);
     els.refreshDevicesBtn.addEventListener('click', async () => {
         clearError();
         setStatus('Henter enheder...');
@@ -529,7 +649,7 @@ async function init() {
 
     state.config = await configPromise;
     renderUI();
-    setStatus('Klar (Phase 1) — playback kommer i Phase 2');
+    setStatus('Klar');
 }
 
 document.addEventListener('DOMContentLoaded', init);
