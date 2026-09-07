@@ -336,6 +336,7 @@ function cacheEls() {
     els.logoutBtn = document.getElementById('logout-btn');
     els.devicePicker = document.getElementById('device-picker');
     els.deviceSelect = document.getElementById('device-select');
+    els.refreshDevicesBtn = document.getElementById('refresh-devices-btn');
     els.userInfo = document.getElementById('user-info');
     els.userName = document.getElementById('user-name');
     els.playbackArea = document.getElementById('playback-area');
@@ -459,6 +460,30 @@ async function init() {
     els.stopBtn.addEventListener('click', () => {
         // TODO Phase 2: PUT /me/player/pause
         setStatus('(Phase 2) Ville stoppe afspilning');
+    });
+    els.refreshDevicesBtn.addEventListener('click', async () => {
+        clearError();
+        setStatus('Henter enheder...');
+        try {
+            const devices = await fetchDevices();
+            state.devices = devices;
+            const stored = sessionStorage.getItem(SS_SELECTED_DEVICE);
+            if (stored && devices.some((d) => d.id === stored)) {
+                state.selectedDeviceId = stored;
+            } else if (devices.length > 0) {
+                const active = devices.find((d) => d.is_active);
+                state.selectedDeviceId = (active || devices[0]).id;
+                sessionStorage.setItem(SS_SELECTED_DEVICE, state.selectedDeviceId);
+            } else {
+                state.selectedDeviceId = null;
+            }
+            renderUI();
+            setStatus(devices.length
+                ? `Fandt ${devices.length} enhed(er)`
+                : 'Ingen enheder fundet — åbn Spotify-appen og start en sang kort');
+        } catch (err) {
+            showError(err.message);
+        }
     });
 
     // Load config.json in parallel with auth resolution
