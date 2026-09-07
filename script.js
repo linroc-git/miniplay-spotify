@@ -11,8 +11,9 @@
 // Config
 // ============================================================================
 
-// Replace with your Spotify Client ID from https://developer.spotify.com/dashboard
-const SPOTIFY_CLIENT_ID = 'YOUR_CLIENT_ID';
+// Spotify Client ID (public — safe to commit; PKCE flow, no client secret used).
+// Registered at https://developer.spotify.com/dashboard
+const SPOTIFY_CLIENT_ID = '80be63b6ca1f4d38a7b1a3cc33b10c3e';
 
 // Redirect URI must match exactly what's registered in the Spotify dashboard.
 // Uses current origin + path so it works both locally and on GitHub Pages.
@@ -92,11 +93,6 @@ async function sha256Base64Url(input) {
  * Start the PKCE login flow. Redirects the browser to Spotify's auth page.
  */
 async function startLogin() {
-    if (SPOTIFY_CLIENT_ID === 'YOUR_CLIENT_ID') {
-        showError('SPOTIFY_CLIENT_ID er ikke sat i script.js. Se README.md.');
-        return;
-    }
-
     const codeVerifier = generateRandomString(64);
     const codeChallenge = await sha256Base64Url(codeVerifier);
 
