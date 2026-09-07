@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>miniplay-Spotify</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with login -->
+        <header>
+            <h1>miniplay-Spotify</h1>
+            <div id="auth-section">
+                <button id="login-btn" class="btn btn-large">Login med Spotify</button>
+                <div id="device-picker" style="display: none;">
+                    <label for="device-select">Velg enhed:</label>
+                    <select id="device-select"></select>
+                </div>
+                <div id="user-info" style="display: none;">
+                    <p>Logget ind som: <span id="user-name"></span></p>
+                    <button id="logout-btn" class="btn btn-small">Log ud</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main playback area -->
+        <main id="playback-area" style="display: none;">
+            <div id="track-buttons" class="track-grid">
+                <!-- Track buttons inserted here by JS -->
+            </div>
+
+            <div class="controls">
+                <button id="stop-btn" class="btn btn-danger">Stop musikk</button>
+            </div>
+
+            <div id="playback-status">
+                <p id="status-text">Klar til å spille</p>
+            </div>
+        </main>
+
+        <!-- Loading message -->
+        <div id="loading" style="display: none;">
+            <p>Laster...</p>
+        </div>
+
+        <!-- Error message -->
+        <div id="error" class="error" style="display: none;">
+            <p id="error-text"></p>
+        </div>
+    </div>
+
+    <!-- Spotify Web Playback SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    
+    <!-- Application script -->
+    <script>
+        // TODO: Implement auth flow, device picker, playback control
+        // See ARCHITECTURE.md for phases
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
