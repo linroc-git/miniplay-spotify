@@ -22,20 +22,21 @@ Konfig-fil (config.json eller inline i HTML) der definerer hvert talepunkt:
   {
     "label": "Punkt 1 — Velkomst",
     "track_uri": "spotify:track:TRACK_ID_HER",
-    "start_ms": 30000,
-    "duration_ms": 20000
+    "start": "0:30",
+    "duration": "0:20"
   },
   {
     "label": "Punkt 2 — Barndom",
     "track_uri": "spotify:track:TRACK_ID_HER",
-    "start_ms": 62000,
-    "duration_ms": 25000
+    "start": "1:02",
+    "duration": "0:25"
   }
 ]
 ```
 
-- Spotify Web API bruges til at styre afspilning: `PUT /me/player/play` med `position_ms`
-- Automatisk stop efter `duration_ms` via `setTimeout` + `PUT /me/player/pause`
+- `start` / `duration` er strenge i `m:ss` (eller `h:mm:ss`); `start` er valgfri (default 0).
+- Spotify Web API bruges til at styre afspilning: `PUT /me/player/play` med `position_ms` (parsed fra `start`)
+- Automatisk stop efter `duration` via `setTimeout` + `PUT /me/player/pause`
 
 ### UI
 - Stort, mobil-venligt layout (ingen mouse-only elementer)

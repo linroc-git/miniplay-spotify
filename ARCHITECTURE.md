@@ -30,7 +30,7 @@ Statisk GitHub Pages web-app (HTML/CSS/JS) der styrer Spotify-afspilning via OAu
 **Decision: JSON array in `config.json` (checked into repo)**
 - ✅ Static file, no server needed
 - ✅ Easy to edit for new presentations
-- ✅ Structure: label, track_uri, start_ms, duration_ms
+- ✅ Structure: label, track_uri, start ("m:ss"), duration ("m:ss")
 - Rationale: Simple, version-controlled, no build step needed
 
 ## File Structure
@@ -72,7 +72,7 @@ miniplay-spotify/
 
 **Tests:**
 - Manual: Press button → song starts at correct position
-- Auto-stop triggers after duration_ms
+- Auto-stop triggers after duration (parsed from "m:ss" to ms internally)
 - Stop button works
 - No errors on network hiccups
 
