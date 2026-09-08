@@ -2,19 +2,19 @@
   {
     "label": "1 skælder ud",
     "track_uri": "spotify:track:6c2IbcyJmr9uYlxn9siTJe",
-    "start_ms": 60000,
-    "duration_ms": 20000
+    "start": "1:00",
+    "duration": "0:20"
   },
   {
     "label": "2 ål",
     "track_uri": "spotify:track:1PTjUY9XVJWTQAPxljLNfw",
-    "start_ms": 74000,
-    "duration_ms": 10000
+    "start": "1:14",
+    "duration": "0:10"
   },
   {
     "label": "3 dårligt",
     "track_uri": "spotify:track:2HHWD8oHcpV5MZ80fCb4Ch",
-    "start_ms": 115000,
-    "duration_ms": 10000
+    "start": "1:55",
+    "duration": "0:10"
   }
 ]

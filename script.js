@@ -351,6 +351,39 @@ async function pausePlayback(deviceId) {
 // Config
 // ============================================================================
 
+/**
+ * Parse a time string in "m:ss" or "h:mm:ss" form into milliseconds.
+ * Also accepts a plain number of seconds as a string ("90") or a bare
+ * number (already ms is NOT supported — keep the format explicit).
+ * Throws on invalid input.
+ */
+function parseTimeString(value, fieldName) {
+    if (typeof value !== 'string') {
+        throw new Error(`${fieldName} skal være en streng i formatet "m:ss" eller "h:mm:ss" (fik ${JSON.stringify(value)})`);
+    }
+    const parts = value.trim().split(':');
+    if (parts.length < 2 || parts.length > 3) {
+        throw new Error(`${fieldName} = "${value}" er ikke gyldigt tidsformat (brug "m:ss" eller "h:mm:ss")`);
+    }
+    const nums = parts.map((p) => {
+        const n = Number(p);
+        if (!Number.isFinite(n) || n < 0) {
+            throw new Error(`${fieldName} = "${value}" indeholder ugyldigt tal (${p})`);
+        }
+        return n;
+    });
+    let h = 0, m = 0, s = 0;
+    if (nums.length === 2) {
+        [m, s] = nums;
+    } else {
+        [h, m, s] = nums;
+    }
+    if (s >= 60 || m >= 60) {
+        throw new Error(`${fieldName} = "${value}" har sekunder/minutter >= 60`);
+    }
+    return Math.round((h * 3600 + m * 60 + s) * 1000);
+}
+
 async function loadConfig() {
     const res = await fetch('config.json', { cache: 'no-cache' });
     if (!res.ok) {
@@ -360,13 +393,31 @@ async function loadConfig() {
     if (!Array.isArray(raw)) {
         throw new Error('config.json skal være et array af tracks.');
     }
-    // Minimal validation — Phase 2 will consume these fields.
-    for (const entry of raw) {
-        if (!entry.label || !entry.track_uri || typeof entry.duration_ms !== 'number') {
-            throw new Error(`Ugyldig config-entry: ${JSON.stringify(entry)}`);
+    // Parse timestamps up front so playback code can use ms internally.
+    return raw.map((entry, i) => {
+        if (!entry || typeof entry !== 'object') {
+            throw new Error(`Ugyldig config-entry [${i}]: ${JSON.stringify(entry)}`);
         }
-    }
-    return raw;
+        if (!entry.label || !entry.track_uri) {
+            throw new Error(`Config-entry [${i}] mangler label eller track_uri`);
+        }
+        if (entry.duration === undefined) {
+            throw new Error(`Config-entry [${i}] (${entry.label}) mangler duration ("m:ss")`);
+        }
+        const start_ms = entry.start !== undefined
+            ? parseTimeString(entry.start, `[${i}] ${entry.label}.start`)
+            : 0;
+        const duration_ms = parseTimeString(entry.duration, `[${i}] ${entry.label}.duration`);
+        if (duration_ms <= 0) {
+            throw new Error(`Config-entry [${i}] (${entry.label}) duration skal være > 0`);
+        }
+        return {
+            label: entry.label,
+            track_uri: entry.track_uri,
+            start_ms,
+            duration_ms,
+        };
+    });
 }
 
 // ============================================================================

@@ -35,11 +35,13 @@ Rediger `config.json` for at tilpasse talepunkterne.
   {
     "label": "Navn på punkt",
     "track_uri": "spotify:track:TRACK_ID",
-    "start_ms": 30000,
-    "duration_ms": 20000
+    "start": "0:30",
+    "duration": "0:20"
   }
 ]
 ```
+
+- `start` og `duration` er strenge i `m:ss` (eller `h:mm:ss`). `start` kan udelades — så startes fra 0.
 
 **Få Track URI:**
 1. Åben Spotify-app eller web
