@@ -1,20 +1,20 @@
 [
   {
-    "label": "Punkt 1 — Velkomst",
-    "track_uri": "spotify:track:7qiZfU4dY1lsylvNL7XhKe",
-    "start_ms": 0,
+    "label": "1 skælder ud",
+    "track_uri": "spotify:track:6c2IbcyJmr9uYlxn9siTJe",
+    "start_ms": 60000,
     "duration_ms": 20000
   },
   {
-    "label": "Punkt 2 — Barndom",
-    "track_uri": "spotify:track:4cOdK2wGLETKBW3PvgPWqLv",
-    "start_ms": 0,
-    "duration_ms": 25000
+    "label": "2 ål",
+    "track_uri": "spotify:track:1PTjUY9XVJWTQAPxljLNfw",
+    "start_ms": 74000,
+    "duration_ms": 10000
   },
   {
-    "label": "Punkt 3 — Afslutning",
-    "track_uri": "spotify:track:2takcwgaK5gtjX3pJ1yb4e",
-    "start_ms": 0,
-    "duration_ms": 20000
+    "label": "3 dårligt",
+    "track_uri": "spotify:track:2HHWD8oHcpV5MZ80fCb4Ch",
+    "start_ms": 115000,
+    "duration_ms": 10000
   }
 ]
