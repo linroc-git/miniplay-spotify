@@ -14,8 +14,10 @@
             <div id="auth-section">
                 <button id="login-btn" class="btn btn-large">Login med Spotify</button>
                 <div id="device-picker" style="display: none;">
-                    <label for="device-select">Velg enhed:</label>
+                    <label for="device-select">Vælg enhed:</label>
                     <select id="device-select"></select>
+                    <button id="refresh-devices-btn" class="btn btn-small">🔄 Genindlæs enheder</button>
+                    <p class="hint">Enheden dukker kun op hvis Spotify-appen har været aktiv for nylig. Åbn Spotify-appen, start en sang kort, pause, og tryk Genindlæs.</p>
                 </div>
                 <div id="user-info" style="display: none;">
                     <p>Logget ind som: <span id="user-name"></span></p>

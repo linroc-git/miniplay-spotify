@@ -58,6 +58,14 @@ header h1 {
     cursor: pointer;
 }
 
+#device-picker .hint {
+    font-size: 12px;
+    opacity: 0.75;
+    text-align: center;
+    line-height: 1.4;
+    max-width: 320px;
+}
+
 #user-info {
     text-align: center;
 }
