@@ -1,20 +1,10 @@
 [
   {
-    "label": "1 skælder ud",
-    "track_uri": "spotify:track:6c2IbcyJmr9uYlxn9siTJe",
-    "start": "1:00",
-    "duration": "0:20"
-  },
-  {
-    "label": "2 ål",
-    "track_uri": "spotify:track:6JjLdYF4tnAR6tJt9bypOu",
-    "start": "1:14",
-    "duration": "0:10"
-  },
-  {
-    "label": "3 dårligt",
-    "track_uri": "spotify:track:2HHWD8oHcpV5MZ80fCb4Ch",
-    "start": "1:55",
-    "duration": "0:10"
+    "label": "Medley",
+    "clips": [
+      { "track_uri": "spotify:track:6c2IbcyJmr9uYlxn9siTJe", "start": "1:00", "duration": "0:20" },
+      { "track_uri": "spotify:track:6JjLdYF4tnAR6tJt9bypOu", "start": "1:14", "duration": "0:10" },
+      { "track_uri": "spotify:track:2HHWD8oHcpV5MZ80fCb4Ch", "start": "1:55", "duration": "0:10" }
+    ]
   }
 ]
