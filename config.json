@@ -1,9 +1,9 @@
 [
   {
-    "label": "Medley",
+    "label": "Medley.",
     "clips": [
       { "label": "Elvis åbner hårdt", "track_uri": "spotify:track:7JO9xpBP2uwgMMINJkc43y", "start": "0:00", "duration": "0:12" },
-      { "label": "cliff, move it",     "track_uri": "spotify:track:6nXDXAhxPPsWFz75F9uhZh", "start": "0:16", "duration": "0:29" },
+      { "label": "cliff, move it",     "track_uri": "spotify:track:6nXDXAhxPPsWFz75F9uhZh", "start": "0:16", "duration": "0:25" },
       { "label": "Elvis, love me tender",     "track_uri": "spotify:track:7iBBcw61QVJxI3NDzlpX2E", "start": "0:00", "duration": "0:14" },
       { "label": "Living doll",        "track_uri": "spotify:track:6HDbmUw2YMs5ls1RK6ale8", "start": "0:00", "duration": "0:22" },
       { "label": "falling in love",     "track_uri": "spotify:track:44AyOl4qVkzS48vBsbNXaC", "start": "0:16", "duration": "0:29" },
