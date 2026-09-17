@@ -1,6 +1,6 @@
 [
   {
-    "label": "Medley..",
+    "label": "Medley.",
     "clips": [
       { "label": "Elvis åbner hårdt", "track_uri": "spotify:track:7JO9xpBP2uwgMMINJkc43y", "start": "0:00", "duration": "0:12" },
       { "label": "cliff, move it",     "track_uri": "spotify:track:6nXDXAhxPPsWFz75F9uhZh", "start": "0:16", "duration": "0:25" },
@@ -62,12 +62,12 @@
     "label": "bøf med løg",
     "track_uri": "spotify:track:5iLZ4tLReL0pPSVL2sZ1iR",
     "start": "0:38",
-    "duration": "0:50"
+    "duration": "0:57"
   },
   {
-    "label": "-",
-    "track_uri": "spotify:track:6aF03L3ffqQqeeJnkNSyKi",
+    "label": "Svantes lykkelige dag",
+    "track_uri": "spotify:track:140daOzWpGHVxJwoxBYPZ0",
     "start": "0:00",
-    "duration": "0:01"
+    "duration": "2:51"
   }
 ]
