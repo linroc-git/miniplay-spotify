@@ -467,7 +467,15 @@ async function loadConfig() {
             if (duration_ms <= 0) {
                 throw new Error(`Clip ${where} duration skal være > 0`);
             }
-            return { track_uri: clip.track_uri, start_ms, duration_ms };
+            // Optional clip.label — shown in status line during medley playback
+            // so the user can see which song of the medley is currently playing.
+            // Missing/empty is fine (falls back to just showing '(N/M)').
+            return {
+                label: (typeof clip.label === 'string' && clip.label.trim()) || null,
+                track_uri: clip.track_uri,
+                start_ms,
+                duration_ms,
+            };
         });
 
         return { label: entry.label, clips };
@@ -668,7 +676,17 @@ async function handleTrackClick(index) {
     const playClip = async (clipIdx) => {
         const clip = track.clips[clipIdx];
         const total = track.clips.length;
-        const progressLabel = total > 1 ? `${track.label} (${clipIdx + 1}/${total})` : track.label;
+        // Compose the status line. For medleys we tack on the per-clip label
+        // (when provided) so the user can identify the current song:
+        //   'Medley (2/6) — Cliff Move it'
+        // Single-clip entries keep the simple 'Afspiller: <label>' form.
+        let progressLabel;
+        if (total > 1) {
+            progressLabel = `${track.label} (${clipIdx + 1}/${total})`;
+            if (clip.label) progressLabel += ` — ${clip.label}`;
+        } else {
+            progressLabel = track.label;
+        }
         setStatus(`Afspiller: ${progressLabel}`);
         await playTrack(clip.track_uri, clip.start_ms || 0, deviceId);
         scheduleAdvance(clipIdx);
