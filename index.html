@@ -34,11 +34,17 @@
 
             <div class="controls">
                 <button id="stop-btn" class="btn btn-danger">Stop musikk</button>
+                <button id="whats-playing-btn" class="btn">🔍 Vis nuværende spor</button>
             </div>
 
             <div id="playback-status">
                 <p id="status-text">Klar til å spille</p>
             </div>
+
+            <!-- Populated when "Vis nuværende spor" is clicked. Kept separate
+                 from status-text so it can show multi-line info + a copy button
+                 without breaking existing status messages. -->
+            <div id="now-playing-info" style="display: none;"></div>
         </main>
 
         <!-- Loading message -->

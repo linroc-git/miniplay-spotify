@@ -347,6 +347,26 @@ async function pausePlayback(deviceId) {
     throw new Error(`Pause fejlede (${res.status}): ${text}`);
 }
 
+/**
+ * Fetch the user's currently playing track (any device, any context — not
+ * limited to the picked one). Returns null when nothing is playing (Spotify
+ * returns 204 No Content in that case).
+ *
+ * Doc: https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track
+ */
+async function fetchCurrentlyPlaying() {
+    const res = await spotifyFetch('/me/player/currently-playing');
+    // 204 = nothing playing (or private session). Treat as "unknown".
+    if (res.status === 204) return null;
+    if (!res.ok) {
+        throw new Error(`Kunne ikke hente nuværende spor (${res.status})`);
+    }
+    const data = await res.json();
+    // data.item can be null on ads or podcasts we don't handle.
+    if (!data || !data.item) return null;
+    return data;
+}
+
 // ============================================================================
 // Config
 // ============================================================================
@@ -437,6 +457,8 @@ function cacheEls() {
     els.playbackArea = document.getElementById('playback-area');
     els.trackButtons = document.getElementById('track-buttons');
     els.stopBtn = document.getElementById('stop-btn');
+    els.whatsPlayingBtn = document.getElementById('whats-playing-btn');
+    els.nowPlayingInfo = document.getElementById('now-playing-info');
     els.statusText = document.getElementById('status-text');
     els.loading = document.getElementById('loading');
     els.error = document.getElementById('error');
@@ -608,6 +630,76 @@ async function handleStopClick() {
     }
 }
 
+/**
+ * Query Spotify for the user's currently playing track and render it in the
+ * #now-playing-info block. Purpose: quick way to grab a Spotify track URI
+ * for use in config.json without leaving the app for the Spotify client.
+ *
+ * Renders artist, title, album (year), and a copy-to-clipboard button for the
+ * full `spotify:track:<id>` URI. Copy uses the async Clipboard API; on
+ * insecure contexts (http://) it silently falls back to a manual-select prompt.
+ */
+async function handleWhatsPlayingClick() {
+    clearError();
+    // Show "loading" state in the info box immediately so the user knows the
+    // click registered even if the API round-trip takes a second.
+    els.nowPlayingInfo.innerHTML = '<p><em>Henter…</em></p>';
+    show(els.nowPlayingInfo);
+
+    try {
+        const data = await fetchCurrentlyPlaying();
+        if (!data) {
+            els.nowPlayingInfo.innerHTML =
+                '<p><em>Ingen sang spiller lige nu. Start en sang i Spotify-appen og prøv igen.</em></p>';
+            return;
+        }
+        const track = data.item;
+        const id = track.id;
+        const uri = track.uri; // "spotify:track:<id>"
+        const artists = track.artists.map(a => a.name).join(', ');
+        const albumName = track.album.name;
+        const albumYear = (track.album.release_date || '').slice(0, 4);
+
+        // Build the info card. Escape user-facing strings via textContent when
+        // assigning below to guard against tracks with markup in their names.
+        els.nowPlayingInfo.innerHTML = `
+            <div class="now-playing-card">
+                <p><strong class="np-title"></strong></p>
+                <p class="np-album"></p>
+                <p>ID: <code class="np-id"></code></p>
+                <p>URI: <code class="np-uri"></code>
+                    <button type="button" class="btn btn-small np-copy" title="Kopiér URI">📋 Kopiér</button>
+                </p>
+            </div>
+        `;
+        els.nowPlayingInfo.querySelector('.np-title').textContent = `${artists} — ${track.name}`;
+        els.nowPlayingInfo.querySelector('.np-album').textContent =
+            albumYear ? `${albumName} (${albumYear})` : albumName;
+        els.nowPlayingInfo.querySelector('.np-id').textContent = id;
+        els.nowPlayingInfo.querySelector('.np-uri').textContent = uri;
+
+        const copyBtn = els.nowPlayingInfo.querySelector('.np-copy');
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(uri);
+                copyBtn.textContent = '✅ Kopieret';
+                setTimeout(() => { copyBtn.textContent = '📋 Kopiér'; }, 1500);
+            } catch (err) {
+                // Fallback for insecure contexts (http://) where Clipboard API is blocked.
+                // Select the URI text so the user can Ctrl+C manually.
+                const range = document.createRange();
+                range.selectNode(els.nowPlayingInfo.querySelector('.np-uri'));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                copyBtn.textContent = '→ Markeret — tryk Ctrl+C';
+                setTimeout(() => { copyBtn.textContent = '📋 Kopiér'; }, 2500);
+            }
+        });
+    } catch (err) {
+        els.nowPlayingInfo.innerHTML = `<p class="error-inline">${err.message}</p>`;
+    }
+}
+
 // ============================================================================
 // Boot
 // ============================================================================
@@ -632,6 +724,7 @@ async function init() {
         sessionStorage.setItem(SS_SELECTED_DEVICE, state.selectedDeviceId);
     });
     els.stopBtn.addEventListener('click', handleStopClick);
+    els.whatsPlayingBtn.addEventListener('click', handleWhatsPlayingClick);
     els.refreshDevicesBtn.addEventListener('click', async () => {
         clearError();
         setStatus('Henter enheder...');
