@@ -9,5 +9,13 @@
       { "track_uri": "spotify:track:44AyOl4qVkzS48vBsbNXaC", "start": "0:00", "duration": "0:33" },
       { "track_uri": "spotify:track:1SOAN58QwnQABl2SND1wMh", "start": "0:00", "duration": "0:25" }
     ]
+  },
+  {
+    "label": "Synge højt",
+    { "track_uri": "spotify:track:0VLsiZjFDrxbL6BIRfdHIv", "start": "0:00", "duration": "0:16" },
+  },
+  {
+    "label": "Slåbrok",
+    { "track_uri": "spotify:track:7y7iRNVA8d6n9ERYnCyxg0", "start": "0:38", "duration": "0:54" },
   }
 ]
