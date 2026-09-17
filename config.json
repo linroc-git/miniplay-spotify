@@ -12,18 +12,26 @@
   },
   {
     "label": "Synge højt",
-    { "track_uri": "spotify:track:0VLsiZjFDrxbL6BIRfdHIv", "start": "0:00", "duration": "0:16" },
+    "track_uri": "spotify:track:0VLsiZjFDrxbL6BIRfdHIv",
+    "start": "0:00",
+    "duration": "0:16"
   },
   {
     "label": "Slåbrok",
-    { "track_uri": "spotify:track:7y7iRNVA8d6n9ERYnCyxg0", "start": "0:38", "duration": "0:54" },
+    "track_uri": "spotify:track:7y7iRNVA8d6n9ERYnCyxg0",
+    "start": "0:38",
+    "duration": "0:54"
   },
-    {
+  {
     "label": "Rock Follies",
-    { "track_uri": "spotify:track:4V4ztR21dPzWBMI48iW2UM", "start": "0:00", "duration": "1:00" },
+    "track_uri": "spotify:track:4V4ztR21dPzWBMI48iW2UM",
+    "start": "0:00",
+    "duration": "1:00"
   },
-   {
+  {
     "label": "Erik Grip",
-    { "track_uri": "spotify:track:75pKnHqOoAc2mQoD1gDqTl", "start": "0:33", "duration": "0:34" },
+    "track_uri": "spotify:track:75pKnHqOoAc2mQoD1gDqTl",
+    "start": "0:33",
+    "duration": "0:34"
   }
 ]
