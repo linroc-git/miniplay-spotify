@@ -86,21 +86,21 @@ eller **flere uddrag i rækkefølge** (medley) uden pause imellem.
   {
     "label": "Medley",
     "clips": [
-      { "track_uri": "spotify:track:AAA", "start": "1:00", "duration": "0:20" },
-      { "track_uri": "spotify:track:BBB", "start": "1:14", "duration": "0:10" },
-      { "track_uri": "spotify:track:CCC", "start": "1:55", "duration": "0:10" }
+      { "label": "Elvis åbner hårdt", "track_uri": "spotify:track:AAA", "start": "1:00", "duration": "0:20" },
+      { "label": "Cliff Move it",     "track_uri": "spotify:track:BBB", "start": "1:14", "duration": "0:10" },
+      { "label": "Love me tender",    "track_uri": "spotify:track:CCC", "start": "1:55", "duration": "0:10" }
     ]
   }
 ]
 ```
 
-Afspilles i rækkefølge, uden pause imellem. Status viser fx `Afspiller: Medley (2/3)` mens den kører.
+Afspilles i rækkefølge, uden pause imellem. Status viser fx `Afspiller: Medley (2/3) — Cliff Move it` mens den kører. Clip-label er valgfri men anbefalet — gør config nemmere at navigere og hjælper dig og publikum med at følge med.
 
 ### Felter
 
 - `label` — vises på knappen
 - `track_uri` — Spotify track URI (format `spotify:track:XXXXX`). Brug enten `track_uri` på top-niveau ELLER `clips`-arrayet, ikke begge.
-- `clips` — array af clips (hver med `track_uri` + `start` + `duration`)
+- `clips` — array af clips (hver med `track_uri` + `start` + `duration`, valgfri `label`)
 - `start` — hvor i sangen den starter. Streng i `m:ss` (eller `h:mm:ss`). Kan udelades → starter fra 0
 - `duration` — hvor længe klippet spiller
 
