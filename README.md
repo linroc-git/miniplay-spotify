@@ -63,7 +63,10 @@ Alternativt: højreklik en sang direkte i Spotify-appen → Share → Copy Spoti
 
 Rediger `config.json` for at tilpasse talepunkterne.
 
-**Format:**
+Hver entry svarer til én knap. En knap kan afspille enten **ét enkelt uddrag**
+eller **flere uddrag i rækkefølge** (medley) uden pause imellem.
+
+### Enkelt uddrag
 
 ```json
 [
@@ -76,10 +79,32 @@ Rediger `config.json` for at tilpasse talepunkterne.
 ]
 ```
 
+### Medley (flere uddrag efter hinanden)
+
+```json
+[
+  {
+    "label": "Medley",
+    "clips": [
+      { "track_uri": "spotify:track:AAA", "start": "1:00", "duration": "0:20" },
+      { "track_uri": "spotify:track:BBB", "start": "1:14", "duration": "0:10" },
+      { "track_uri": "spotify:track:CCC", "start": "1:55", "duration": "0:10" }
+    ]
+  }
+]
+```
+
+Afspilles i rækkefølge, uden pause imellem. Status viser fx `Afspiller: Medley (2/3)` mens den kører.
+
+### Felter
+
 - `label` — vises på knappen
-- `track_uri` — Spotify track URI (format `spotify:track:XXXXX`)
+- `track_uri` — Spotify track URI (format `spotify:track:XXXXX`). Brug enten `track_uri` på top-niveau ELLER `clips`-arrayet, ikke begge.
+- `clips` — array af clips (hver med `track_uri` + `start` + `duration`)
 - `start` — hvor i sangen den starter. Streng i `m:ss` (eller `h:mm:ss`). Kan udelades → starter fra 0
-- `duration` — hvor længe den spiller
+- `duration` — hvor længe klippet spiller
+
+**Bemærk:** Spotify's Web API har ~200-400ms buffering mellem play-calls, så medley-overgange er ikke helt gap-free — der er et lille hop mellem clips.
 
 ---
 

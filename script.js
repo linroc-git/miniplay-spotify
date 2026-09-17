@@ -414,29 +414,63 @@ async function loadConfig() {
         throw new Error('config.json skal være et array af tracks.');
     }
     // Parse timestamps up front so playback code can use ms internally.
+    //
+    // Two entry shapes are supported:
+    //   1. Legacy single-clip:  { label, track_uri, start, duration }
+    //   2. Multi-clip medley:   { label, clips: [{ track_uri, start, duration }, ...] }
+    //
+    // Both normalise to the same in-memory shape: `clips` is always an array
+    // of one or more clips. Playback code doesn't need to know which format
+    // the user wrote.
     return raw.map((entry, i) => {
         if (!entry || typeof entry !== 'object') {
             throw new Error(`Ugyldig config-entry [${i}]: ${JSON.stringify(entry)}`);
         }
-        if (!entry.label || !entry.track_uri) {
-            throw new Error(`Config-entry [${i}] mangler label eller track_uri`);
+        if (!entry.label) {
+            throw new Error(`Config-entry [${i}] mangler label`);
         }
-        if (entry.duration === undefined) {
-            throw new Error(`Config-entry [${i}] (${entry.label}) mangler duration ("m:ss")`);
+
+        // Reject mixing the two formats — forces the author to be explicit.
+        const hasClips = Array.isArray(entry.clips);
+        const hasInlineTrack = entry.track_uri !== undefined;
+        if (hasClips && hasInlineTrack) {
+            throw new Error(`Config-entry [${i}] (${entry.label}) må ikke have både "track_uri" og "clips" — vælg én`);
         }
-        const start_ms = entry.start !== undefined
-            ? parseTimeString(entry.start, `[${i}] ${entry.label}.start`)
-            : 0;
-        const duration_ms = parseTimeString(entry.duration, `[${i}] ${entry.label}.duration`);
-        if (duration_ms <= 0) {
-            throw new Error(`Config-entry [${i}] (${entry.label}) duration skal være > 0`);
+        if (!hasClips && !hasInlineTrack) {
+            throw new Error(`Config-entry [${i}] (${entry.label}) mangler enten "track_uri" eller "clips"`);
         }
-        return {
-            label: entry.label,
-            track_uri: entry.track_uri,
-            start_ms,
-            duration_ms,
-        };
+
+        // Normalise the raw clip list — legacy single-clip becomes a one-element list.
+        const rawClips = hasClips
+            ? entry.clips
+            : [{ track_uri: entry.track_uri, start: entry.start, duration: entry.duration }];
+
+        if (rawClips.length === 0) {
+            throw new Error(`Config-entry [${i}] (${entry.label}) har tom clips-liste`);
+        }
+
+        const clips = rawClips.map((clip, j) => {
+            const where = `[${i}] ${entry.label}.clips[${j}]`;
+            if (!clip || typeof clip !== 'object') {
+                throw new Error(`Ugyldig clip ${where}: ${JSON.stringify(clip)}`);
+            }
+            if (!clip.track_uri) {
+                throw new Error(`Clip ${where} mangler track_uri`);
+            }
+            if (clip.duration === undefined) {
+                throw new Error(`Clip ${where} mangler duration ("m:ss")`);
+            }
+            const start_ms = clip.start !== undefined
+                ? parseTimeString(clip.start, `${where}.start`)
+                : 0;
+            const duration_ms = parseTimeString(clip.duration, `${where}.duration`);
+            if (duration_ms <= 0) {
+                throw new Error(`Clip ${where} duration skal være > 0`);
+            }
+            return { track_uri: clip.track_uri, start_ms, duration_ms };
+        });
+
+        return { label: entry.label, clips };
     });
 }
 
@@ -563,7 +597,18 @@ function clearAutoStop() {
     }
 }
 
-/** User clicked a track button — start playback + schedule auto-stop. */
+/**
+ * User clicked a track button — start playback of the entry's clip sequence.
+ *
+ * Every entry has a `clips` array (single-clip entries are normalised to a
+ * length-1 array during load). We chain clips by scheduling the next `play`
+ * call at the end of the current clip's duration — no explicit pause in
+ * between so the user hears a seamless-ish transition (Spotify's play call
+ * has ~200-400ms buffering latency; can't eliminate that with the Web API).
+ *
+ * After the LAST clip we pause. Stop button or a new track click cancels the
+ * pending chain via clearAutoStop() (the timer holds the whole sequence).
+ */
 async function handleTrackClick(index) {
     clearError();
     const track = state.config[index];
@@ -578,28 +623,60 @@ async function handleTrackClick(index) {
     clearAutoStop();
 
     const deviceId = state.selectedDeviceId;
-    setStatus(`Starter: ${track.label}...`);
     state.activeTrackIndex = index;
     updateActiveButton();
 
-    try {
-        await playTrack(track.track_uri, track.start_ms || 0, deviceId);
-        setStatus(`Afspiller: ${track.label} (stopper om ${Math.round(track.duration_ms / 1000)}s)`);
-
-        // Schedule auto-stop.
+    // Helper: schedule advance to next clip, or final pause if this was the last.
+    // clipIdx is the clip we JUST STARTED — timer fires when it should end.
+    const scheduleAdvance = (clipIdx) => {
+        const currentClip = track.clips[clipIdx];
         state.autoStopTimeoutId = setTimeout(async () => {
             state.autoStopTimeoutId = null;
-            try {
-                await pausePlayback(deviceId);
+            // Bail out if the user started something else in the meantime.
+            if (state.activeTrackIndex !== index) return;
+
+            const nextIdx = clipIdx + 1;
+            if (nextIdx < track.clips.length) {
+                // Chain to next clip. No pause between — straight new play call.
+                try {
+                    await playClip(nextIdx);
+                } catch (err) {
+                    state.activeTrackIndex = null;
+                    updateActiveButton();
+                    showError(`Medley-clip ${nextIdx + 1} fejlede: ${err.message}`);
+                    setStatus('Klar');
+                }
+            } else {
+                // Last clip done — pause + reset UI.
+                try {
+                    await pausePlayback(deviceId);
+                } catch (err) {
+                    showError(`Auto-stop fejlede: ${err.message}`);
+                }
                 if (state.activeTrackIndex === index) {
                     state.activeTrackIndex = null;
                     updateActiveButton();
                     setStatus(`Færdig: ${track.label}`);
                 }
-            } catch (err) {
-                showError(`Auto-stop fejlede: ${err.message}`);
             }
-        }, track.duration_ms);
+        }, currentClip.duration_ms);
+    };
+
+    // Helper: start clip N in the sequence + update status + schedule its end.
+    // Extracted so scheduleAdvance() can call it recursively without duplicating
+    // the play-and-schedule logic.
+    const playClip = async (clipIdx) => {
+        const clip = track.clips[clipIdx];
+        const total = track.clips.length;
+        const progressLabel = total > 1 ? `${track.label} (${clipIdx + 1}/${total})` : track.label;
+        setStatus(`Afspiller: ${progressLabel}`);
+        await playTrack(clip.track_uri, clip.start_ms || 0, deviceId);
+        scheduleAdvance(clipIdx);
+    };
+
+    try {
+        setStatus(`Starter: ${track.label}…`);
+        await playClip(0);
     } catch (err) {
         state.activeTrackIndex = null;
         updateActiveButton();
