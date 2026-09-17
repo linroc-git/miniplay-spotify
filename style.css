@@ -219,3 +219,39 @@ main {
 #error-text {
     color: #ff6b6b;
 }
+
+/* --- "Vis nuværende spor" info-kort ---------------------------- */
+/* Vises kun når brugeren har trykket Vis nuværende spor. Layout   */
+/* passer til bunden af playback-area, over #playback-status.      */
+
+#now-playing-info {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(29, 185, 84, 0.4);
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+#now-playing-info .now-playing-card p { margin: 4px 0; }
+#now-playing-info .np-title { font-size: 16px; }
+#now-playing-info .np-album { color: #b3b3b3; }
+
+#now-playing-info code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    user-select: all;      /* nem at click-select hvis Clipboard API fejler */
+}
+
+#now-playing-info .np-copy {
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+#now-playing-info .error-inline {
+    color: #ff6b6b;
+}
