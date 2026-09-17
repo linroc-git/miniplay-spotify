@@ -1,6 +1,6 @@
 [
   {
-    "label": "Medley",
+    "label": "Medley..",
     "clips": [
       { "label": "Elvis åbner hårdt", "track_uri": "spotify:track:7JO9xpBP2uwgMMINJkc43y", "start": "0:00", "duration": "0:12" },
       { "label": "cliff, move it",     "track_uri": "spotify:track:6nXDXAhxPPsWFz75F9uhZh", "start": "0:16", "duration": "0:25" },
@@ -44,6 +44,6 @@
     "label": "Tour",
     "track_uri": "spotify:track:51RqKoqNO5Zb7ZzWkrE0Bb",
     "start": "0:18",
-    "duration": "0:33"
+    "duration": "0:15"
   }
 ]
