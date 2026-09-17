@@ -3,33 +3,71 @@
 En simpel web-controller til at afspille musikudsnit fra Spotify mellem talepunkter.
 
 **Stack:** Statisk HTML/CSS/JS, hostet på GitHub Pages
+**Live URL:** <https://linroc-git.github.io/miniplay-spotify/>
 
-## Setup
+---
 
-### 1. Spotify Developer Registration
-1. Gå til https://developer.spotify.com/dashboard
-2. Login (eller opret konto)
-3. Opret ny "Application"
-4. Accepter vilkårene
-5. Nå får du **Client ID**
+## Quick Start (til slutbrugere)
 
-### 2. Redirect URI i Spotify Dashboard
-1. I Application-indstillinger, gå til "Edit Settings"
-2. Sæt **Redirect URIs** til: `https://linroc-git.github.io/miniplay-spotify/`
-3. Gem
+### Krav
 
-### 3. Client ID i koden
-1. I `script.js`, erstat `YOUR_CLIENT_ID` med din Client ID fra step 1
+- **Spotify Premium**-konto (API-playback virker ikke på Free)
+- Spotify-app kørende på en enhed (PC, mobil, Sonos, Chromecast, ...)
+- Browser: Chrome / Edge / Safari
 
-### 4. Spotify Premium krav
-- Spotify Premium-konto kræves (API playback virker ikke på gratis-konti)
-- Spotify-appen skal køre på telefonen (kan være minimeret)
+### Første gang
+
+1. Åbn <https://linroc-git.github.io/miniplay-spotify/>
+2. Klik **"Login med Spotify"** → godkend adgang
+3. Du bliver sendt tilbage til siden, nu logget ind
+
+### Sådan afspiller du
+
+1. **Start Spotify-appen** på den enhed du vil bruge (PC-app, mobil, Sonos-højttaler, ...)
+2. **Spil kort en tilfældig sang** i Spotify-appen → enheden bliver "aktiv" og synlig for miniplay
+3. Tilbage i miniplay: **vælg enhed** i dropdown (fx `MAX (Computer)` eller din mobil)
+4. Klik en af **track-knapperne** — det afspiller uddraget defineret i `config.json`
+5. **Stop musikk** stopper afspilningen
+
+**Hvis enheden ikke er i dropdown:** Klik **🔄 Genindlæs enheder**. Enheder forsvinder efter få minutters idle — start en sang kort i Spotify-app igen for at "vække" den.
+
+### Sådan finder du track-URI'er til config.json
+
+1. Start en sang i Spotify (hvilken som helst enhed)
+2. I miniplay: klik **🔍 Vis nuværende spor**
+3. Info-boks viser:
+   ```
+   Artist — Title
+   Album (år)
+   ID:   4uLU6hMCjMI75M1A2tKUQC
+   URI:  spotify:track:4uLU6hMCjMI75M1A2tKUQC  [📋 Kopiér]
+   ```
+4. Klik **📋 Kopiér** → URI'en er i clipboard
+5. Paste ind i `config.json` under `track_uri`
+
+Alternativt: højreklik en sang direkte i Spotify-appen → Share → Copy Spotify URI.
+
+### Fejlfinding
+
+| Problem | Løsning |
+|---|---|
+| "Ingen enheder" | Start en sang i Spotify-app, klik 🔄 Genindlæs |
+| "Playback afvist — kræver Spotify Premium" | Free-konto, virker ikke |
+| "Enhed ikke aktiv" | Genstart en sang kort i Spotify-app for at vække enheden |
+| Ingenting sker når du klikker en knap | Åbn Console (F12), tjek fejl. Ofte cached JS — Ctrl+Shift+R for hard-reload |
+| Login fejler / loop | Log ud, ryd cookies, prøv igen |
+
+---
 
 ## Config
 
 Rediger `config.json` for at tilpasse talepunkterne.
 
-**Format:**
+Hver entry svarer til én knap. En knap kan afspille enten **ét enkelt uddrag**
+eller **flere uddrag i rækkefølge** (medley) uden pause imellem.
+
+### Enkelt uddrag
+
 ```json
 [
   {
@@ -41,54 +79,68 @@ Rediger `config.json` for at tilpasse talepunkterne.
 ]
 ```
 
-- `start` og `duration` er strenge i `m:ss` (eller `h:mm:ss`). `start` kan udelades — så startes fra 0.
+### Medley (flere uddrag efter hinanden)
 
-**Få Track URI:**
-1. Åben Spotify-app eller web
-2. Ret-klik på sang → "Share" → "Spotify URI" (kopiér)
-3. Brug hele streng: `spotify:track:XXXXX`
+```json
+[
+  {
+    "label": "Medley",
+    "clips": [
+      { "track_uri": "spotify:track:AAA", "start": "1:00", "duration": "0:20" },
+      { "track_uri": "spotify:track:BBB", "start": "1:14", "duration": "0:10" },
+      { "track_uri": "spotify:track:CCC", "start": "1:55", "duration": "0:10" }
+    ]
+  }
+]
+```
 
-## Deploy
+Afspilles i rækkefølge, uden pause imellem. Status viser fx `Afspiller: Medley (2/3)` mens den kører.
+
+### Felter
+
+- `label` — vises på knappen
+- `track_uri` — Spotify track URI (format `spotify:track:XXXXX`). Brug enten `track_uri` på top-niveau ELLER `clips`-arrayet, ikke begge.
+- `clips` — array af clips (hver med `track_uri` + `start` + `duration`)
+- `start` — hvor i sangen den starter. Streng i `m:ss` (eller `h:mm:ss`). Kan udelades → starter fra 0
+- `duration` — hvor længe klippet spiller
+
+**Bemærk:** Spotify's Web API har ~200-400ms buffering mellem play-calls, så medley-overgange er ikke helt gap-free — der er et lille hop mellem clips.
+
+---
+
+## Setup (til udvikler / første deploy)
+
+### 1. Spotify Developer Registration
+
+1. Gå til <https://developer.spotify.com/dashboard>
+2. Login (eller opret konto)
+3. Opret ny "Application"
+4. Accepter vilkårene
+5. Kopiér **Client ID**
+
+### 2. Redirect URI i Spotify Dashboard
+
+1. I Application-indstillinger, gå til "Edit Settings"
+2. Sæt **Redirect URIs** til: `https://linroc-git.github.io/miniplay-spotify/`
+3. Gem
+
+### 3. Client ID i koden
+
+1. I `script.js`, erstat `YOUR_CLIENT_ID` med din Client ID fra step 1
+
+### 4. Deploy til GitHub Pages
 
 1. Aktiver GitHub Pages i repo-settings:
    - Settings → Pages
    - Source: `main` branch, root folder
    - Save
+2. Første deploy tager 1-2 min. Efterfølgende push til `main` deployes automatisk
 
-2. Gå til `https://linroc-git.github.io/miniplay-spotify/` og test
+---
 
 ## Udvikling
 
 Se `ARCHITECTURE.md` for design-decisioner og implementation-faser.
-
-Starter med:
-- [ ] Auth (PKCE-flow)
-- [ ] Device picker
-- [ ] Playback control (play/stop buttons)
-- [ ] Token refresh
-- [ ] UI polish
-
-## Testing
-
-**Manual test på Android:**
-1. Åben Chrome
-2. Gå til GitHub Pages URL
-3. Login med Spotify
-4. Vælg device
-5. Tryk knap → musik skal starte
-
-## Troubleshooting
-
-**"Playback kontrollen virker ikke"**
-- Spotify-app skal køre på enhed
-- Kræver Spotify Premium
-
-**"Token udløbet"**
-- Implementation af token refresh i phase 2
-
-**"Device ikke fundet"**
-- Åben Spotify-app og spil en sang først
-- Da vil enheden blive synlig i device-listen
 
 ---
 

@@ -1,42 +1,13 @@
 [
   {
-    "label": "1 Elvis åbner hårdt",
-    "track_uri": "spotify:track:7JO9xpBP2uwgMMINJkc43y",
-    "start": "0:00",
-    "duration": "0:10"
-  },
-  {
-    "label": "2 Cliff, Move it",
-    "track_uri": "spotify:track:44AyOl4qVkzS48vBsbNXaC",
-    "start": "0:16",
-    "duration": "0:29"
-  },
-  {
-    "label": "3 love me tender",
-    "track_uri": "spotify:track:7iBBcw61QVJxI3NDzlpX2E",
-    "start": "0:00",
-    "duration": "0:14"
-  },
-  {
-    "label": "4 Living doll",
-    "track_uri": "spotify:track:6HDbmUw2YMs5ls1RK6ale8",
-    "start": "0:00",
-    "duration": "0:22"
-  },
-{
-    "label": "5 only fools",
-    "track_uri": "spotify:track:44AyOl4qVkzS48vBsbNXaC",
-    "start": "0:00",
-    "duration": "0:33"
-},
-  {
-    "label": "6 Congratulations",
-    "track_uri": "spotify:track:1SOAN58QwnQABl2SND1wMh",
-    "start": "0:00",
-    "duration": "0:25"
-
-  
-}
-
-  
+    "label": "Medley",
+    "clips": [
+      { "track_uri": "spotify:track:7JO9xpBP2uwgMMINJkc43y", "start": "0:00", "duration": "0:10" },
+      { "track_uri": "spotify:track:44AyOl4qVkzS48vBsbNXaC", "start": "0:16", "duration": "0:29" },
+      { "track_uri": "spotify:track:7iBBcw61QVJxI3NDzlpX2E", "start": "0:00", "duration": "0:14" },
+      { "track_uri": "spotify:track:6HDbmUw2YMs5ls1RK6ale8", "start": "0:00", "duration": "0:22" },
+      { "track_uri": "spotify:track:44AyOl4qVkzS48vBsbNXaC", "start": "0:00", "duration": "0:33" },
+      { "track_uri": "spotify:track:1SOAN58QwnQABl2SND1wMh", "start": "0:00", "duration": "0:25" }
+    ]
+  }
 ]
