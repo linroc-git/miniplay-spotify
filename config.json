@@ -33,5 +33,11 @@
     "track_uri": "spotify:track:75pKnHqOoAc2mQoD1gDqTl",
     "start": "0:33",
     "duration": "0:34"
+  },
+   {
+    "label": "Hausgård",
+    "track_uri": "spotify:track:6xbiiDEEIptOUDA18Oc2Do",
+    "start": "0:18",
+    "duration": "0:33"
   }
 ]
