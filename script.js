@@ -337,8 +337,13 @@ async function pausePlayback(deviceId) {
         ? `/me/player/pause?device_id=${encodeURIComponent(deviceId)}`
         : '/me/player/pause';
     const res = await spotifyFetch(path, { method: 'PUT' });
-    // 204 success. 403 often means "already paused" — treat as OK.
-    if (res.status === 204 || res.status === 202 || res.status === 403) return;
+    // Success codes:
+    //   204 = documented success (no body).
+    //   200 = Spotify sometimes returns 200 with a request-id body — also OK.
+    //   202 = accepted / device waking up.
+    //   403 = often 'already paused' — treat as OK.
+    // Basically: anything in the 2xx range is a success for pause.
+    if (res.ok || res.status === 403) return;
     if (res.status === 404) {
         // Device disappeared — silent OK, nothing to pause.
         return;
