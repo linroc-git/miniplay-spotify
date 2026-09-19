@@ -73,7 +73,7 @@
   {
     "label": "line danser klaver",
     "clips": [
-      { "label": "del1", "track_uri": "spotify:track:spotify:track:3e70aXj25kr1GJt2cDhBJC", "start": "0:00", "duration": "3:03" },
+      { "label": "del1", "track_uri": "spotify:track:3e70aXj25kr1GJt2cDhBJC", "start": "0:00", "duration": "3:03" },
       { "label": "del2",  "track_uri": "spotify:track:3e70aXj25kr1GJt2cDhBJC", "start": "2:19", "duration": "1:34" }
     ]
   }
